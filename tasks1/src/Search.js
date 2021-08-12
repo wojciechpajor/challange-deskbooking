@@ -3,28 +3,47 @@ import {useState, useEffect} from "react";
 import {searchSpaces} from "./service/search";
 import delay from "./service/delay";
 import debounce from 'lodash'
+import {searchAdresses} from "./service/searchAddress";
 
 const Search = () => {
-    const [inputText,setInputText] = useState([])
-    const [text,setText] = useState('')
+    const [inputTextS,setInputTextS] = useState([])
+    const [inputTextA,setInputTextA] = useState([])
 
 
 
-    const changeHandler = (event) => {
+
+    const changeHandlerS = (event) => {
         const e = event;
 
     searchSpaces(e)
         .then(delay(500))
         .then((data) => {
         console.log(data);
-        setInputText(data.map(data => (data.name)));
+        setInputTextS(data.map(data => (data.name)));
     })
         .catch((message) => {
         window.alert("something went wrong message")
-            changeHandler(e);
+            changeHandlerS(e);
     })
 
     }
+
+    const changeHandlerA = (event) => {
+        const e = event;
+
+        searchAdresses(e)
+            .then(delay(500))
+            .then((data) => {
+                console.log(data);
+                setInputTextA(data.map(data => (data.address + " " + data.country)));
+            })
+            .catch((message) => {
+                window.alert("something went wrong message")
+                changeHandlerA(e);
+            })
+
+    }
+
 
     const debounce = (func) => {
         let timer;
@@ -38,12 +57,21 @@ const Search = () => {
         }
     }
 
-    const handleChange = useCallback(debounce(changeHandler), [])
+    const handleChangeS = useCallback(debounce(changeHandlerS), [])
+    const handleChangeA = useCallback(debounce(changeHandlerA), [])
 
     return <div>
-        <input type="text" onChange={(e) => handleChange(e.target.value)}/>
+        <p>Space</p>
+        <input type="text" placeholder="insert space" onChange={(e) => handleChangeS(e.target.value)}/>
         {
-            inputText.map(name => (
+            inputTextS.map(name => (
+                <li className="liStyle">{name}</li>
+            ))
+        }
+        <p>Adress</p>
+        <input type="text" placeholder="insert adress" onChange={(e) => handleChangeA(e.target.value)}/>
+        {
+            inputTextA.map(name => (
                 <li className="liStyle">{name}</li>
             ))
         }
