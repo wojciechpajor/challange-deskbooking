@@ -1,17 +1,17 @@
 import React, {useCallback} from 'react'
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {searchSpaces} from "./service/search";
 import delay from "./service/delay";
 import debounce from 'lodash'
 
 const Search = () => {
     const [inputText,setInputText] = useState([])
+    const [text,setText] = useState('')
 
-    const changeDebouncer = (text) => {
-        debounce(changeHandler(text),1000);
-        };
 
-    const changeHandler = (e) => {
+
+    const changeHandler = (event) => {
+        const e = event;
 
     searchSpaces(e)
         .then(delay(500))
@@ -25,8 +25,23 @@ const Search = () => {
     })
 
     }
+
+    const debounce = (func) => {
+        let timer;
+        return function (...args){
+            const context = this;
+            if (timer) clearTimeout(timer)
+            timer = setTimeout(()=> {
+                timer = null
+                func.apply(context,args);
+            },500)
+        }
+    }
+
+    const handleChange = useCallback(debounce(changeHandler), [])
+
     return <div>
-        <input type="text" onChange={(e) => changeDebouncer(e.target.value)}/>
+        <input type="text" onChange={(e) => handleChange(e.target.value)}/>
         {
             inputText.map(name => (
                 <li className="liStyle">{name}</li>
